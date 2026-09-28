@@ -1,83 +1,91 @@
-# 🥊 The Godfather Fight Game — v4
-
-**Godot 4.6 · 1v1 · Two wireless controllers · Living room arena**
-
-## ▶️ Quick Start
-1. Open **Godot 4.6** → Import → select `project.godot`
-2. Connect **2 wireless controllers**
-3. Press **Play ▶** — starts at the title screen
+# The Diems Fight 🥊
+### Godot 4.2+ Project  —  2D Family Fighting Game
 
 ---
 
-## 🎮 Controller Layout (same for both players)
+## 🚀 How to Open
 
-| Button | Action |
-|--------|--------|
-| **D-Pad** left/right | Move |
-| **X** (Cross) | Jump |
-| **Square** □ | Punch  *(works in air!)* |
-| **Circle** ○ | Kick   *(works in air!)* |
-| **R2** (hold) | Block — absorbs 85% damage |
-| **□ + △** (Square + Triangle) | 🐑 Sheep Summon |
-| **○ + △** (Circle + Triangle) | 🔩 Drill Attack |
-| **START** | Rematch / confirm |
-
-> P1 = Controller port 0 · P2 = Controller port 1
+1. Install **Godot 4.2+** from https://godotengine.org
+2. Open Godot → **Import** → select `TheDiemsFight/project.godot`
+3. Press **F5** (or ▶) to play
 
 ---
 
-## ⚔️ Move Details
+## 🎮 Controls
 
-### 👊 Punch (□)  — 12 dmg / 10 in air
-7-frame combo. Works on ground and in the air.
-
-### 🦵 Kick (○) — 20 dmg / 16 in air
-3-frame strong kick with heavy knockback. Works on ground and in the air.
-
-### 🛡️ Block (R2 hold) — ground only
-7-frame block animation. Reduces incoming damage by 85%.
-
-### 🐑 Sheep Summon (□+△)
-Gesture animation (frames 19–25), then 5 sheep spawn and **always walk toward the enemy**.  
-Each sheep: 10 damage, disappears on hit. 4 s cooldown.
-
-### 🔩 Drill Attack (○+△)
-- Setup phase (frames 26–27): equip drill + mask
-- Walk phase (frames 28–30 looping): advance toward enemy for **5 seconds**, dealing **5 dmg every 0.22 s**
-- 9 s cooldown
+| Action  | Player 1 | Player 2      |
+|---------|----------|---------------|
+| Move ◄► | A / D    | ← / → Arrows  |
+| Jump    | W        | ↑ Arrow       |
+| Punch   | F        | Numpad 1      |
+| Kick    | G        | Numpad 2      |
+| Special | H        | Numpad 3      |
+| Block   | V        | Numpad 0      |
+| Back    | ESC (on char select) | |
 
 ---
 
-## 🗺️ Frame Map (0-based, sheet: 42 × 32×32 px)
+## ⚔️ Game Flow
 
-| Animation | Frames | Frames (1-based) |
-|-----------|--------|-----------------|
-| Idle | 0–3 | 1–4 |
-| Walk | 4–7 | 5–8 |
-| Punch | 8–14 | 9–15 |
-| Jump | 15–17 | 16–18 |
-| Sheep gesture | 18–24 | 19–25 |
-| Drill | 25–29 | 26–30 |
-| Block | 30–36 | 31–37 |
-| Kick | 37–39 | 38–40 |
+```
+Main Menu  →  Character Select  →  Fight  →  Main Menu
+```
+
+- **Best of 3 rounds**, 99-second timer per round
+- Highest HP when timer expires wins the round
+- **Block** reduces damage by 90%
+- **Special** deals 2× damage
+- **Kick** deals 1.3× damage
+- Taking a hit ≥14 damage causes a full **knockdown** (1 second)
+
+---
+
+## 👥 Roster
+
+| Character     | HP  | Speed | Damage | Special                   |
+|---------------|-----|-------|--------|---------------------------|
+| Middle        | 100 | 200   | 10     | Big swing (frames 19-21)  |
+| Millennial    | 95  | 210   | 9      | Magic blast (frames 19-23)|
+| Om Yosef      | 110 | 180   | 13     | Power move + angel victory|
+| The American  | 100 | 220   | 10     | Fast combo                |
+| The Aunty     | 90  | 215   | 9      | Agile attacks             |
+| The Godfather | 120 | 170   | 14     | Slow but devastating      |
+| The Godmother | 105 | 195   | 12     | Magic bolt (frames 27-31) |
 
 ---
 
 ## 📁 Structure
+
 ```
-GFGame_v4/
-├── project.godot          ← Open this
-├── assets/
-│   ├── TheGodFatherCharacter-Sheet.png
-│   ├── HealthBar-Sheet.png
-│   ├── Thelivingroom.png
-│   └── Sheep.png
-├── scenes/
-│   ├── StartMenu.tscn     ← Title screen
-│   └── Main.tscn          ← Fight scene
-└── scripts/
-    ├── SignalBus.gd
-    ├── StartMenu.gd
-    ├── Fighter.gd
-    └── GameManager.gd
+project.godot          ← open this
+scripts/
+  GameData.gd          ← AutoLoad: all character + frame data
+  Fighter.gd           ← character controller (state machine)
+  FightScene.gd        ← arena, HUD, round manager
+  MainMenu.gd          ← title screen
+  CharSelect.gd        ← character selection
+scenes/
+  MainMenu.tscn
+  CharSelect.tscn
+  FightScene.tscn      ← each scene is just a Node2D + script
+assets/
+  sprites/             ← all character sheets (32×32 frames)
+  ui/                  ← background, menu, health bar, char select
+  maps/                ← environment sheet
 ```
+
+---
+
+## 🔧 Tweaking Frame Data
+
+All animation frame numbers are in `scripts/GameData.gd`.
+Each entry looks like:
+```gdscript
+"punch": {"start": 9, "count": 3, "fps": 12, "loop": false},
+```
+- `start` = first frame index on the sheet (0-based, left to right)
+- `count` = number of frames in this animation
+- `fps`   = playback speed
+- `loop`  = whether it loops
+
+All sheets are a single horizontal row of **32×32 pixel** frames.
